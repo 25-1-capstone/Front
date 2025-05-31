@@ -28,6 +28,8 @@
     },
     "experiments": {
       "newArchEnabled": true
-    }
+    },
+    "plugins": ["expo-router", "expo-font"],
+    "scheme": "study-timer"
   }
 }
