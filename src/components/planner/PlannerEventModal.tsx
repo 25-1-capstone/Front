@@ -18,6 +18,7 @@ import ModalHeader from "./ModalHeader";
 import DateTimeRow from "./DateTimeRow";
 import RepeatOptionSelector from "./RepeatOptionSelector";
 import AlarmOptionSelector from "./AlarmOptionSelector";
+import axios from "axios";
 
 interface PlannerEventModalProps {
   visible: boolean;
@@ -31,6 +32,7 @@ interface PlannerEventModalProps {
 
 const ITEM_HEIGHT = 40;
 const VISIBLE_ITEMS = 5;
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 export default function PlannerEventModal({
   visible,
@@ -88,6 +90,72 @@ export default function PlannerEventModal({
   const [showDescriptionInput, setShowDescriptionInput] = useState(false);
   const [description, setDescription] = useState("");
 
+  const [title, setTitle] = useState("");
+
+  // 시간/날짜를 ISO 포맷으로 변환하는 함수 (타임존 오프셋 보정)
+  function toISOStringLocal(
+    dateStr: string,
+    hour: string,
+    minute: string,
+    meridiem: string
+  ) {
+    let h = parseInt(hour, 10);
+    if (meridiem === "오후" && h !== 12) h += 12;
+    if (meridiem === "오전" && h === 12) h = 0;
+    const m = parseInt(minute.replace("분", ""), 10);
+    // "YYYY-MM-DDTHH:mm:00" 형태로 문자열 생성
+    const dateTimeStr = `${dateStr}T${h.toString().padStart(2, "0")}:${m
+      .toString()
+      .padStart(2, "0")}:00`;
+    // Date 객체 생성 (로컬 시간)
+    const date = new Date(dateTimeStr);
+    // 타임존 오프셋(분)을 ms로 변환해서 더함
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(date.getTime() - tzOffset)
+      .toISOString()
+      .slice(0, 19);
+    // 'YYYY-MM-DDTHH:mm:ss' 형태로 반환 (Z 없음)
+    return localISOTime;
+  }
+
+  // 저장 함수
+  const handleSave = async () => {
+    try {
+      const startDateISO = toISOStringLocal(
+        startDate,
+        startHour,
+        startMinute,
+        startMeridiem
+      );
+      const endDateISO = toISOStringLocal(
+        endDate,
+        endHour,
+        endMinute,
+        endMeridiem
+      );
+      const repeatType =
+        repeatOption === "반복 안함" ? "반복 없음" : repeatOption;
+      const notification = alarmOption === "없음" ? 0 : 1; // 필요시 상세 매핑
+      const payload = {
+        title,
+        description,
+        startDate: startDateISO,
+        endDate: endDateISO,
+        repeatType,
+        notification,
+      };
+      console.log(payload);
+      await axios.post(`${BACKEND_URL}/schedule`, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+      alert(startDateISO);
+      alert(endDateISO);
+      onClose();
+    } catch (e) {
+      alert("일정 저장에 실패했습니다.");
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -100,12 +168,14 @@ export default function PlannerEventModal({
       </TouchableWithoutFeedback>
       <View style={styles.modalContainerSheet}>
         {/* 상단 취소/저장 */}
-        <ModalHeader onClose={onClose} />
+        <ModalHeader onClose={onClose} onSave={handleSave} />
         {/* 제목 입력 */}
         <TextInput
           style={styles.modalTitleInput}
           placeholder="제목 추가"
           placeholderTextColor="#bbb"
+          value={title}
+          onChangeText={setTitle}
         />
         <View style={styles.modalDivider} />
         {/* 시작 날짜/시간 */}
@@ -154,6 +224,7 @@ export default function PlannerEventModal({
                 options={meridiemOptions}
                 value={startMeridiem}
                 onChange={setStartMeridiem}
+                delayMs={300}
               />
               <CustomWheelPicker
                 options={hourOptions}
@@ -225,6 +296,7 @@ export default function PlannerEventModal({
                 options={meridiemOptions}
                 value={endMeridiem}
                 onChange={setEndMeridiem}
+                delayMs={300}
               />
               <CustomWheelPicker
                 options={hourOptions}

@@ -11,11 +11,31 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import axios from "axios";
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 const GroupCreateScreen: React.FC = () => {
   const router = useRouter();
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
+
+  // 그룹 생성 함수
+  const handleCreateGroup = async () => {
+    try {
+      const payload = {
+        name: name,
+        description: desc,
+      };
+      await axios.post(`${BACKEND_URL}/group`, payload, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+      router.back(); // 성공 시 이전 페이지로 이동
+    } catch (e) {
+      alert("그룹 생성에 실패했습니다.");
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -29,7 +49,7 @@ const GroupCreateScreen: React.FC = () => {
         <View style={styles.container}>
           {/* 헤더 */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity onPress={() => router.push("/group/group-add")}>
               <Ionicons name="chevron-back" size={24} />
             </TouchableOpacity>
           </View>
@@ -57,7 +77,10 @@ const GroupCreateScreen: React.FC = () => {
 
           <View style={{ flex: 1 }} />
 
-          <TouchableOpacity style={styles.createBtn}>
+          <TouchableOpacity
+            style={styles.createBtn}
+            onPress={handleCreateGroup}
+          >
             <Text style={styles.createBtnText}>스터디 그룹 생성</Text>
           </TouchableOpacity>
         </View>
@@ -70,12 +93,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    paddingTop: 60,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     width: "90%",
     left: "5%",
+    marginBottom: 20,
   },
   title: {
     fontSize: 20,
@@ -89,6 +114,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     width: "90%",
     left: "5%",
+    marginBottom: 20,
   },
   input: {
     position: "relative",

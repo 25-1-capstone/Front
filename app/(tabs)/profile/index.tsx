@@ -1,16 +1,40 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import axios from "axios";
 
 const ProfileScreen: React.FC = () => {
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
 
+  // 로그아웃 함수
+  const handleLogout = async () => {
+    try {
+      // 서버에 로그아웃 요청 (세션 쿠키 만료)
+      await axios.get("http://18.208.62.86:3000/logout", {
+        withCredentials: true,
+      });
+    } catch (e) {}
+    setModalVisible(false);
+    router.replace("/(auth)/login");
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <Text style={styles.title}>설정</Text>
       <View style={styles.menuList}>
+        <TouchableOpacity onPress={() => router.push("/profile/edit")}>
+          <Text style={styles.menuItem}>프로필 수정</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => router.push("/profile/allowed-actions")}
         >
@@ -30,12 +54,7 @@ const ProfileScreen: React.FC = () => {
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>로그아웃 하시겠습니까?</Text>
             <View style={styles.modalButtonRow}>
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false);
-                  // 여기에 실제 로그아웃 처리 로직 작성
-                }}
-              >
+              <TouchableOpacity onPress={handleLogout}>
                 <Text style={styles.confirmText}>확인</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setModalVisible(false)}>

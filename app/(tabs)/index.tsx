@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,10 @@ import StatisticsBarChart from "../../src/components/statistics/StatisticsBarCha
 import StatisticsTimeChart from "../../src/components/statistics/StatisticsTimeChart";
 import Card from "../../src/components/common/Card";
 
+const WS_URL = "ws://your-server-url/status"; // 실제 웹소켓 주소로 변경 필요
+
+const RECONNECT_INTERVAL = 3000; // 3초 후 재연결
+
 const getTodayString = () => {
   const today = new Date();
   const month = today.getMonth() + 1;
@@ -25,6 +29,62 @@ const getTodayString = () => {
 
 const HomeScreen: React.FC = () => {
   const router = useRouter();
+
+  // 웹소켓으로 받아올 상태값
+  const [status, setStatus] = useState("휴대폰 감상");
+  const [timer, setTimer] = useState("00:00:04");
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // 웹소켓 연결 함수
+  const connectWebSocket = () => {
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+    const ws = new WebSocket(WS_URL);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("웹소켓 연결됨");
+      if (reconnectTimeout.current) {
+        clearTimeout(reconnectTimeout.current);
+        reconnectTimeout.current = null;
+      }
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.timer) setTimer(data.timer);
+        if (data.status) setStatus(data.status);
+      } catch (e) {
+        console.error("웹소켓 데이터 파싱 오류", e);
+      }
+    };
+
+    ws.onerror = (e) => {
+      console.error("웹소켓 에러", e);
+      ws.close(); // 에러 발생 시 연결 종료
+    };
+
+    ws.onclose = (e) => {
+      console.warn("웹소켓 연결 종료, 재연결 시도", e.reason);
+      // 재연결 시도
+      if (!reconnectTimeout.current) {
+        reconnectTimeout.current = setTimeout(() => {
+          connectWebSocket();
+        }, RECONNECT_INTERVAL);
+      }
+    };
+  };
+
+  useEffect(() => {
+    connectWebSocket();
+    return () => {
+      if (wsRef.current) wsRef.current.close();
+      if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
+    };
+  }, []);
 
   // 웹 환경에서 body minHeight를 동적으로 조정
   useEffect(() => {
@@ -43,14 +103,14 @@ const HomeScreen: React.FC = () => {
         {/* 상단 날짜 및 상태 */}
         <View style={styles.header}>
           <Text style={styles.date}>{getTodayString()}</Text>
-          <Text style={styles.status}>휴대폰 감상</Text>
+          <Text style={styles.status}>{status}</Text>
         </View>
         {/* 프로필/타이머 */}
         <View style={styles.profileTimerRow}>
           <View style={styles.profileCircle}>
             <Ionicons name="person-outline" size={64} color="#BDBDBD" />
           </View>
-          <Text style={styles.timer}>00:00:04</Text>
+          <Text style={styles.timer}>{timer}</Text>
         </View>
         {/* 일정 섹션 */}
         <View style={styles.section}>

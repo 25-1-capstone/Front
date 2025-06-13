@@ -50,7 +50,7 @@ const GroupSearchScreen: React.FC = () => {
     <View style={styles.container}>
       {/* 상단 검색바 */}
       <View style={styles.searchBar}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push("/group/group-add")}>
           <Ionicons name="chevron-back" size={24} />
         </TouchableOpacity>
         <TextInput
@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 60,
     marginBottom: 20,
     width: "90%",
     left: "5%",

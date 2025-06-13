@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableWithoutFeedback, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 import PlannerHeader from "../src/components/planner/PlannerHeader";
 import PlannerDaysRow from "../src/components/planner/PlannerDaysRow";
 import PlannerGrid from "../src/components/planner/PlannerGrid";
@@ -9,6 +9,19 @@ import styles from "../src/styles/planner/plannerStyles";
 
 const today = new Date();
 const todayStr = today.toISOString().slice(0, 10);
+
+// 선택된 날짜가 속한 주의 일~토 날짜 배열 반환
+function getWeekDates(dateString: string): number[] {
+  const date = new Date(dateString);
+  const day = date.getDay(); // 0(일)~6(토)
+  const weekDates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(date);
+    d.setDate(date.getDate() - day + i);
+    weekDates.push(d.getDate());
+  }
+  return weekDates;
+}
 
 const PlannerScreen: React.FC = () => {
   const [showCalendar, setShowCalendar] = useState(false);
@@ -38,34 +51,33 @@ const PlannerScreen: React.FC = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={handleBackgroundPress}>
-      <View style={styles.container}>
-        <PlannerHeader
-          month={today.getMonth() + 1}
-          showCalendar={showCalendar}
-          setShowCalendar={setShowCalendar}
-          selectedDate={selectedDate}
-          onDaySelect={handleDaySelect}
-        />
-        <PlannerDaysRow />
-        <ScrollView
-          style={styles.scrollArea}
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <PlannerGrid />
-        </ScrollView>
-        <Fab iconName="add" onPress={handleFabPress} />
-        <PlannerEventModal
-          visible={isModalVisible}
-          onClose={() => setIsModalVisible(false)}
-          selectedDate={selectedDate}
-          onDatePress={handleDatePress}
-          isDatePickerVisible={isDatePickerVisible}
-          onDatePickerClose={() => setIsDatePickerVisible(false)}
-          onDaySelect={handleDaySelect}
-        />
-      </View>
-    </TouchableWithoutFeedback>
+    <View style={styles.container}>
+      <PlannerHeader
+        month={today.getMonth() + 1}
+        showCalendar={showCalendar}
+        setShowCalendar={setShowCalendar}
+        selectedDate={selectedDate}
+        onDaySelect={handleDaySelect}
+      />
+      <PlannerDaysRow dates={getWeekDates(selectedDate)} />
+      <ScrollView
+        style={styles.scrollArea}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <PlannerGrid />
+      </ScrollView>
+      <Fab iconName="add" onPress={handleFabPress} />
+      <PlannerEventModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        selectedDate={selectedDate}
+        onDatePress={handleDatePress}
+        isDatePickerVisible={isDatePickerVisible}
+        onDatePickerClose={() => setIsDatePickerVisible(false)}
+        onDaySelect={handleDaySelect}
+      />
+    </View>
   );
 };
 
