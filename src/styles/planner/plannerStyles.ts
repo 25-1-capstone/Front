@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff", paddingTop: 60 },
   monthHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   scrollArea: { flex: 1 },
   gridContainer: { flexDirection: "row", minHeight: 40 * 23, marginTop: 8 },
   timeCol: { width: 40, alignItems: "flex-end", paddingRight: 4 },
-  timeText: { height: 40, fontSize: 13, color: "#888" },
+  timeText: { height: 40, fontSize: 12, color: "#888" },
   gridContent: { flex: 1, marginLeft: 8 },
   gridRow: {
     position: "absolute",

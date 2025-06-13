@@ -16,8 +16,8 @@ const ProfileSetting = () => {
   const router = useRouter();
 
   const handleStart = () => {
-    // 프로필 설정 완료 후 홈으로 이동 (예시)
-    router.push("/");
+    // 프로필 설정 완료 후 홈으로 이동
+    router.replace("/");
   };
 
   return (
@@ -59,10 +59,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    borderWidth: 3,
-    borderColor: "#E5E0DF",
-    borderRadius: 5,
-    margin: 2,
     padding: 10,
   },
   title: {

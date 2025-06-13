@@ -24,7 +24,7 @@ const PlannerHeader = ({
   return (
     <View>
       <View style={styles.monthHeader}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push("/")}>
           <Ionicons name="chevron-back" size={20} />
         </TouchableOpacity>
         <Text style={styles.monthText}>{month}월</Text>

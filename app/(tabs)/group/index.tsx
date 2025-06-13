@@ -1,17 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Fab from "../../../src/components/common/Fab";
-
-const groups = [
-  { id: "1", name: "갓생살기 프로젝트 😎", members: 3 },
-  { id: "2", name: "갓생살기 프로젝트 2 😎", members: 25 },
-  { id: "3", name: "갓생살기 프로젝트 3 😎", members: 8 },
-];
+import axios from "axios";
 
 const GroupScreen: React.FC = () => {
   const router = useRouter();
+
+  const [groups, setGroups] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const apiUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
+        const response = await axios.get(`${apiUrl}/group`, {
+          headers: { "Content-Type": "application/json" },
+        });
+        const groupList = response.data.success?.groups || [];
+        setGroups(
+          groupList.map((g: any) => ({
+            id: g.id,
+            name: g.name,
+            members: g.memberCount,
+          }))
+        );
+      } catch (e) {
+        setGroups([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGroups();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -27,6 +49,7 @@ const GroupScreen: React.FC = () => {
           </View>
         )}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={loading ? null : <Text>그룹이 없습니다.</Text>}
       />
       <Fab iconName="add" onPress={() => router.push("/group/group-add")} />
     </SafeAreaView>

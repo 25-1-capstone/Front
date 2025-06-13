@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "StudyTimer",
-    "slug": "study-timer",
+    "name": "AIStudyLens",
+    "slug": "ai-study-lens",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "newArchEnabled": true
@@ -29,7 +31,28 @@
     "experiments": {
       "newArchEnabled": true
     },
-    "plugins": ["expo-router", "expo-font"],
-    "scheme": "study-timer"
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store"
+    ],
+    "scheme": "ai-study-lens",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7a0489f7-eab3-4f32-86e7-361822269c0d"
+      }
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7a0489f7-eab3-4f32-86e7-361822269c0d"
+    }
   }
 }

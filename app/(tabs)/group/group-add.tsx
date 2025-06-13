@@ -49,7 +49,7 @@ const GroupAddScreen: React.FC = () => {
       <View style={styles.container}>
         {/* 헤더 */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={() => router.push("/group")}>
             <Ionicons name="chevron-back" size={24} color="#222" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>스터디 그룹</Text>
@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingTop: 60,
     paddingBottom: 20,
     width: "90%",
     left: "5%",

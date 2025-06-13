@@ -14,13 +14,15 @@ interface CustomWheelPickerProps {
   options: string[];
   value: string;
   onChange: (value: string) => void;
+  delayMs?: number;
 }
 
 function useWheelPickerSelector(
   options: string[],
   value: string,
   itemHeight: number,
-  onChange: (value: string) => void
+  onChange: (value: string) => void,
+  delayMs: number
 ) {
   const scrollRef = useRef<ScrollView>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -35,7 +37,6 @@ function useWheelPickerSelector(
   const onMomentumScrollEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const y = e.nativeEvent.contentOffset.y;
-
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = setTimeout(() => {
         const idx = Math.round(y / itemHeight);
@@ -44,9 +45,9 @@ function useWheelPickerSelector(
           onChange(newValue);
         }
         scrollRef.current?.scrollTo({ y: idx * itemHeight, animated: false });
-      }, 80);
+      }, delayMs);
     },
-    [itemHeight, options, onChange, value]
+    [itemHeight, options, onChange, value, delayMs]
   );
 
   return { scrollRef, onMomentumScrollEnd };
@@ -56,12 +57,14 @@ export default function CustomWheelPicker({
   options,
   value,
   onChange,
+  delayMs = 150,
 }: CustomWheelPickerProps) {
   const { scrollRef, onMomentumScrollEnd } = useWheelPickerSelector(
     options,
     value,
     ITEM_HEIGHT,
-    onChange
+    onChange,
+    delayMs
   );
 
   return (
@@ -73,16 +76,17 @@ export default function CustomWheelPicker({
       }}
     >
       <ScrollView
-        ref={scrollRef}
+        ref={scrollRef as unknown as React.RefObject<ScrollView>}
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
         decelerationRate="fast"
         onMomentumScrollEnd={onMomentumScrollEnd}
+        onScrollEndDrag={onMomentumScrollEnd}
         contentContainerStyle={{ paddingVertical: ITEM_HEIGHT * 2 }}
       >
         {options.map((opt, idx) => (
           <View
-            key={idx}
+            key={String(opt) + idx}
             style={{
               height: ITEM_HEIGHT,
               justifyContent: "center",
